@@ -1,8 +1,6 @@
 import pydeck as pdk
 import pandas as pd
 import streamlit as st
-import matplotlib.pyplot as plt
-import seaborn as sns
 import random
 from manage_data.config_dts import ConfigDTS
 from manage_data.manage_data_city import ManageDataCity

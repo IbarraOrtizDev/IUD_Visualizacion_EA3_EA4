@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
-import matplotlib.pyplot as plt
-import seaborn as sns
+import plotly.express as px
+import plotly.graph_objects as go
 from manage_data.config_dts import ConfigDTS
 # Configuración de la página
 st.set_page_config(
@@ -11,6 +11,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Configuración de tema para Plotly
+px.defaults.template = "plotly_white"
+px.defaults.color_discrete_sequence = px.colors.qualitative.Set3
 
 st.markdown("""
     <style>
@@ -34,22 +37,30 @@ st.title("Análisis Detallado de Ventas")
 config_dts = ConfigDTS()
 df = config_dts.get_data()
 
-# Crear pestañas para diferentes análisis
+
 tab1, tab2, tab3 = st.tabs(["Análisis por País", "Análisis por Método de Pago", "Análisis de Satisfacción"])
 
 with tab1:
     st.header("Análisis de Ventas por País")
-    ventas_por_pais = df.groupby('pais')['venta_total'].sum().sort_values(ascending=False)
+    ventas_por_pais = df.groupby('pais')['venta_total'].sum().sort_values(ascending=False).reset_index()
     
     col1, col2 = st.columns(2)
     with col1:
-        plt.figure(figsize=(10, 6))
-        sns.barplot(x=ventas_por_pais.index, y=ventas_por_pais.values)
-        plt.title('Ventas Totales por País')
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-        st.pyplot(plt.gcf())
-        plt.close()
+        fig = px.bar(
+            ventas_por_pais,
+            x='pais',
+            y='venta_total',
+            title='Ventas Totales por País',
+            labels={'pais': 'País', 'venta_total': 'Ventas Totales (USD)'},
+            color='venta_total',
+            color_continuous_scale='Viridis'
+        )
+        fig.update_layout(
+            xaxis_tickangle=-45,
+            showlegend=False,
+            hovermode='x unified'
+        )
+        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
         st.write("Estadísticas por País:")
@@ -57,16 +68,26 @@ with tab1:
 
 with tab2:
     st.header("Análisis por Método de Pago")
-    ventas_por_metodo = df.groupby('metodo_pago')['venta_total'].sum().sort_values(ascending=False)
+    ventas_por_metodo = df.groupby('metodo_pago')['venta_total'].sum().sort_values(ascending=False).reset_index()
     
     col1, col2 = st.columns(2)
     with col1:
-        plt.figure(figsize=(10, 6))
-        plt.pie(ventas_por_metodo.values, labels=ventas_por_metodo.index, autopct='%1.1f%%')
-        plt.title('Distribución de Ventas por Método de Pago')
-        plt.tight_layout()
-        st.pyplot(plt.gcf())
-        plt.close()
+        fig = px.pie(
+            ventas_por_metodo,
+            values='venta_total',
+            names='metodo_pago',
+            title='Distribución de Ventas por Método de Pago',
+            hole=0.4,
+            color_discrete_sequence=px.colors.qualitative.Set3
+        )
+        fig.update_traces(
+            textposition='inside',
+            textinfo='percent+label',
+            hovertemplate="<b>%{label}</b><br>" +
+                         "Ventas: $%{value:,.2f}<br>" +
+                         "Porcentaje: %{percent}<extra></extra>"
+        )
+        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
         st.write("Estadísticas por Método de Pago:")
@@ -77,13 +98,40 @@ with tab3:
     
     col1, col2 = st.columns(2)
     with col1:
-        plt.figure(figsize=(10, 6))
-        sns.boxplot(data=df, x='calificacion_satisfaccion', y='venta_total')
-        plt.title('Distribución de Ventas por Calificación de Satisfacción')
-        plt.tight_layout()
-        st.pyplot(plt.gcf())
-        plt.close()
+        fig = px.box(
+            df,
+            x='calificacion_satisfaccion',
+            y='venta_total',
+            title='Distribución de Ventas por Calificación de Satisfacción',
+            labels={
+                'calificacion_satisfaccion': 'Calificación de Satisfacción',
+                'venta_total': 'Venta Total (USD)'
+            },
+            color='calificacion_satisfaccion',
+            points='all'  # Muestra todos los puntos
+        )
+        fig.update_layout(
+            showlegend=False,
+            hovermode='x unified'
+        )
+        st.plotly_chart(fig, use_container_width=True)
     
     with col2:
+        # Agregar un gráfico de dispersión adicional
+        fig2 = px.scatter(
+            df,
+            x='calificacion_satisfaccion',
+            y='venta_total',
+            color='categoria',
+            title='Relación entre Satisfacción y Ventas por Categoría',
+            labels={
+                'calificacion_satisfaccion': 'Calificación de Satisfacción',
+                'venta_total': 'Venta Total (USD)',
+                'categoria': 'Categoría'
+            },
+            trendline="ols"
+        )
+        st.plotly_chart(fig2, use_container_width=True)
+        
         st.write("Estadísticas de Satisfacción:")
         st.write(df['calificacion_satisfaccion'].describe()) 

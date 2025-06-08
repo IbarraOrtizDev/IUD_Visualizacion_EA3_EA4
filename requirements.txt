@@ -4,3 +4,5 @@ pydeck
 seaborn
 matplotlib
 openpyxl
+statsmodels
+plotly
