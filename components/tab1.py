@@ -44,6 +44,68 @@ def render():
     # Mostrar en Streamlit
     st.plotly_chart(fig, use_container_width=True)
 
+    # Nuevo gráfico: Método de pago preferido por país
+    st.subheader("Método de Pago Preferido por País")
+    
+    # Preparar datos para el nuevo gráfico
+    df_pais_metodo = df[['pais', 'metodo_pago']].groupby(['pais', 'metodo_pago']).size().reset_index(name='conteo')
+    
+    # Calcular el total por país para obtener porcentajes
+    df_pais_total = df_pais_metodo.groupby('pais')['conteo'].sum().reset_index(name='total')
+    df_pais_metodo = df_pais_metodo.merge(df_pais_total, on='pais')
+    df_pais_metodo['porcentaje'] = (df_pais_metodo['conteo'] / df_pais_metodo['total'] * 100).round(1)
+    
+    # Crear el gráfico de barras apiladas
+    fig_pais = px.bar(df_pais_metodo, 
+                     x='pais', 
+                     y='conteo',
+                     color='metodo_pago',
+                     title='Distribución de Métodos de Pago por País',
+                     labels={
+                         'pais': 'País',
+                         'conteo': 'Número de Transacciones',
+                         'metodo_pago': 'Método de Pago',
+                         'porcentaje': 'Porcentaje'
+                     },
+                     barmode='stack',
+                     template='plotly_white',
+                     hover_data=['porcentaje'])
+    
+    # Personalizar el diseño
+    fig_pais.update_layout(
+        xaxis_tickangle=-45,
+        hovermode='x unified',
+        height=500,
+        legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=0.01
+        )
+    )
+    
+    # Personalizar tooltips
+    fig_pais.update_traces(
+        hovertemplate="<b>País:</b> %{x}<br>" +
+                     "<b>Método de Pago:</b> %{customdata[0]}<br>" +
+                     "<b>Transacciones:</b> %{y}<br>" +
+                     "<b>Porcentaje:</b> %{customdata[1]}%<extra></extra>",
+        customdata=df_pais_metodo[['metodo_pago', 'porcentaje']].values
+    )
+    
+    # Mostrar el gráfico
+    st.plotly_chart(fig_pais, use_container_width=True)
+    
+    # Mostrar tabla de datos
+    with st.expander("Ver datos detallados"):
+        st.dataframe(
+            df_pais_metodo.pivot_table(
+                index='pais',
+                columns='metodo_pago',
+                values=['conteo', 'porcentaje'],
+                aggfunc='first'
+            ).round(1)
+        )
 
     df_join = manage_data_city.df_merge_all()
 
