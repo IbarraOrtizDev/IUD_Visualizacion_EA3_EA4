@@ -38,7 +38,7 @@ config_dts = ConfigDTS()
 df = config_dts.get_data()
 
 
-tab1, tab2, tab3 = st.tabs(["Análisis por País", "Análisis por Método de Pago", "Análisis de Satisfacción"])
+tab1, tab2 = st.tabs(["Análisis por País", "Análisis por Método de Pago"])
 
 with tab1:
     st.header("Análisis de Ventas por País")
@@ -93,45 +93,45 @@ with tab2:
         st.write("Estadísticas por Método de Pago:")
         st.write(ventas_por_metodo)
 
-with tab3:
-    st.header("Análisis de Satisfacción del Cliente")
+# with tab3:
+#     st.header("Análisis de Satisfacción del Cliente")
     
-    col1, col2 = st.columns(2)
-    with col1:
-        fig = px.box(
-            df,
-            x='calificacion_satisfaccion',
-            y='venta_total',
-            title='Distribución de Ventas por Calificación de Satisfacción',
-            labels={
-                'calificacion_satisfaccion': 'Calificación de Satisfacción',
-                'venta_total': 'Venta Total (USD)'
-            },
-            color='calificacion_satisfaccion',
-            points='all'  # Muestra todos los puntos
-        )
-        fig.update_layout(
-            showlegend=False,
-            hovermode='x unified'
-        )
-        st.plotly_chart(fig, use_container_width=True)
+#     col1, col2 = st.columns(2)
+#     with col1:
+#         fig = px.box(
+#             df,
+#             x='calificacion_satisfaccion',
+#             y='venta_total',
+#             title='Distribución de Ventas por Calificación de Satisfacción',
+#             labels={
+#                 'calificacion_satisfaccion': 'Calificación de Satisfacción',
+#                 'venta_total': 'Venta Total (USD)'
+#             },
+#             color='calificacion_satisfaccion',
+#             points='all'  # Muestra todos los puntos
+#         )
+#         fig.update_layout(
+#             showlegend=False,
+#             hovermode='x unified'
+#         )
+#         st.plotly_chart(fig, use_container_width=True)
     
-    with col2:
-        # Agregar un gráfico de dispersión adicional
-        fig2 = px.scatter(
-            df,
-            x='calificacion_satisfaccion',
-            y='venta_total',
-            color='categoria',
-            title='Relación entre Satisfacción y Ventas por Categoría',
-            labels={
-                'calificacion_satisfaccion': 'Calificación de Satisfacción',
-                'venta_total': 'Venta Total (USD)',
-                'categoria': 'Categoría'
-            },
-            trendline="ols"
-        )
-        st.plotly_chart(fig2, use_container_width=True)
+#     with col2:
+#         # Agregar un gráfico de dispersión adicional
+#         fig2 = px.scatter(
+#             df,
+#             x='calificacion_satisfaccion',
+#             y='venta_total',
+#             color='categoria',
+#             title='Relación entre Satisfacción y Ventas por Categoría',
+#             labels={
+#                 'calificacion_satisfaccion': 'Calificación de Satisfacción',
+#                 'venta_total': 'Venta Total (USD)',
+#                 'categoria': 'Categoría'
+#             },
+#             trendline="ols"
+#         )
+#         st.plotly_chart(fig2, use_container_width=True)
         
-        st.write("Estadísticas de Satisfacción:")
-        st.write(df['calificacion_satisfaccion'].describe()) 
+#         st.write("Estadísticas de Satisfacción:")
+#         st.write(df['calificacion_satisfaccion'].describe()) 
