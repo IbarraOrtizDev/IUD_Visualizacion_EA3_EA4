@@ -1,4 +1,5 @@
 import pandas as pd
+from manage_data.config_dts import ConfigDTS
 
 class ManageDataCity:
     _instance = None
@@ -27,4 +28,10 @@ class ManageDataCity:
     def merge_data(self, df):
         df_city = self.get_df_city()
         df_join = pd.merge(df, df_city, left_on=['ciudad', 'pais'], right_on=['city', 'country'], how='left')
+        return df_join
+    
+    def df_merge_all(self):
+        config_dts = ConfigDTS()
+        df = config_dts.get_data()
+        df_join = self.merge_data(df)
         return df_join
